@@ -1,10 +1,9 @@
-import { ColorSwatch, Group } from '@mantine/core';
+import { ColorSwatch, Group, Slider } from '@mantine/core';
 import { Button } from '@/components/ui/button';
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import Draggable from 'react-draggable';
 import { SWATCHES } from '@/constants';
-import { Slider } from '@mantine/core';
 import { FaEraser } from 'react-icons/fa';
 
 interface GeneratedResult {
@@ -32,7 +31,7 @@ export default function Home() {
     const [reset, setReset] = useState(false);
     const [dictOfVars, setDictOfVars] = useState({});
     const [result, setResult] = useState<GeneratedResult>();
-    const [latexPosition, setLatexPosition] = useState({ x: 10, y: 200 });
+    const [latexPosition, setLatexPosition] = useState({ x: 100, y: 10 });
     const [latexExpression, setLatexExpression] = useState<Array<string>>([]);
     const [brushSize, setBrushSize] = useState(3);
     const [isEraserActive, setIsEraserActive] = useState(false);
@@ -67,8 +66,6 @@ export default function Home() {
         if (canvas) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
-                //canvas.width = window.innerWidth;
-                //canvas.height = window.innerHeight - canvas.offsetTop;
                 ctx.lineCap = 'round';
                 ctx.lineWidth = brushSize;
             }
@@ -160,7 +157,7 @@ export default function Home() {
             }
         }
     };
-    
+
     const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
         const canvas = canvasRef.current;
         if (canvas) {
@@ -212,7 +209,7 @@ export default function Home() {
             for (let y = 0; y < canvas.height; y++) {
                 for (let x = 0; x < canvas.width; x++) {
                     const i = (y * canvas.width + x) * 4;
-                    if (imageData.data[i + 3] > 0) {  // If pixel is not transparent
+                    if (imageData.data[i + 3] > 0) {  
                         minX = Math.min(minX, x);
                         minY = Math.min(minY, y);
                         maxX = Math.max(maxX, x);
@@ -238,67 +235,101 @@ export default function Home() {
 
     return (
         <>
-            <div className='grid grid-cols-4 gap-2'>
-                <Button
-                    onClick={() => setReset(true)}
-                    className='z-20 bg-black text-white'
-                    variant='destructive'
-                    color='black'
-                >
-                    Reset
-                </Button>
-                <Button
-                    onClick={() => setIsEraserActive(!isEraserActive)}
-                    className={`z-20 ${isEraserActive ? 'bg-blue-500' : 'bg-black'}`}
-                    variant='outline'
-                >
-                    <FaEraser size={20} color='white' />
-                </Button>
-                <Group className='z-20 border border-gray-200 rounded p-4'>
-                    {SWATCHES.map((swatch) => (
-                        <ColorSwatch key={swatch} color={swatch} onClick={() => setColor(swatch)} />
-                    ))}
-                </Group>
-                <Slider
-                    value={brushSize}
-                    onChange={setBrushSize}
-                    min={1}
-                    max={20}
-                    step={1}
-                    label={(value) => `Brush Size: ${value}`}
-                    className='z-20 border border-gray-200 rounded px-10 py-2'
-                    style={{ width: '200px' }}
-                />
-                <Button
-                    onClick={runRoute}
-                    className='z-20 bg-black text-white'
-                    variant='outline'
-                    color='white'
-                >
-                    Run
-                </Button>
-            </div>
-            <canvas
-                ref={canvasRef}
-                id='canvas'
-                className='absolute top-0 left-0 w-full h-full'
-                onMouseDown={startDrawing}
-                onMouseMove={draw}
-                onMouseUp={stopDrawing}
-                onMouseOut={stopDrawing}
-            />
+            <div className='bg-red-500 w-screen h-screen'>
+                <div className='absolute  bg-gray-900/80 backdrop-blur-sm rounded-xl p-4 shadow-lg z-50'>
+                    <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 items-center'>
+                        <div className='flex flex-row gap-2'>
+                            {/* Reset Button */}
+                            <Button
+                                onClick={() => setReset(true)}
+                                className='w-full bg-red-600 hover:bg-red-700 text-white transition-colors'
+                                variant='destructive'
+                            >
+                                Reset Canvas
+                            </Button>
 
-            {latexExpression && latexExpression.map((latex, index) => (
-                <Draggable
-                    key={index}
-                    defaultPosition={latexPosition}
-                    onStop={(_, data) => setLatexPosition({ x: data.x, y: data.y })}
-                >
-                    <div className="absolute p-2 text-white rounded shadow-md">
-                        <div className="latex-content">{latex}</div>
+                            {/* Eraser Button */}
+                            <Button
+                                onClick={() => setIsEraserActive(!isEraserActive)}
+                                className={`w-full transition-colors ${isEraserActive
+                                    ? 'bg-blue-500 hover:bg-blue-600'
+                                    : 'bg-gray-700 hover:bg-gray-800'
+                                    }`}
+                            >
+                                <FaEraser size={20} className="mr-2" />
+                                {isEraserActive ? 'Eraser On' : 'Eraser Off'}
+                            </Button>
+                        </div>
+
+                        <div >
+                            {/* Brush Size Slider */}
+                            <div className='w-full bg-gray-800/50 rounded-lg p-3'>
+                                <Slider
+                                    value={brushSize}
+                                    onChange={setBrushSize}
+                                    min={1}
+                                    max={20}
+                                    step={1}
+                                    label={(value) => `Size: ${value}px`}
+                                    className='w-full'
+                                    styles={{
+                                        track: { backgroundColor: '#4B5563' },
+                                        thumb: { borderColor: '#3B82F6' },
+                                        bar: { backgroundColor: '#3B82F6' }
+                                    }}
+                                />
+                            </div>
+
+                            {/* Run Button */}
+                            <Button
+                                onClick={runRoute}
+                                className='w-full bg-green-600 hover:bg-green-700 text-white transition-colors'
+                            >
+                                Calculate
+                            </Button>
+                        </div>
+
+                        {/* Color Swatches */}
+                        <div className='w-full sm:col-span-2 p-2 bg-gray-800/50 rounded-lg'>
+                            <Group className='flex justify-center gap-2'>
+                                {SWATCHES.map((swatch) => (
+                                    <ColorSwatch
+                                        key={swatch}
+                                        color={swatch}
+                                        onClick={() => setColor(swatch)}
+                                        className='cursor-pointer transform hover:scale-110 transition-transform'
+                                        size={24}
+                                    />
+                                ))}
+                            </Group>
+                        </div>
                     </div>
-                </Draggable>
-            ))}
+                </div>
+                <div className='absolute top-0 left-0 w-full h-full'>
+                    <canvas
+                        ref={canvasRef}
+                        id='canvas'
+                        onMouseDown={startDrawing}
+                        onMouseMove={draw}
+                        onMouseUp={stopDrawing}
+                        onMouseOut={stopDrawing}
+                    />
+
+                    {latexExpression && latexExpression.map((latex, index) => (
+                        <Draggable
+                            key={index}
+                            defaultPosition={latexPosition}
+                            onStop={(_, data) => setLatexPosition({ x: data.x, y: data.y })}
+                        >
+                            <div className="absolute p-2 text-white rounded shadow-md">
+                                <div className="latex-content">{latex}</div>
+                            </div>
+                        </Draggable>
+                    ))}
+                </div>
+
+            </div>
+
         </>
     );
 }

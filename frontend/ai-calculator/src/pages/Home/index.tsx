@@ -203,7 +203,7 @@ export default function Home() {
                 <Button
                     onClick={() => setReset(true)}
                     className='z-20 bg-black text-white'
-                    variant='default' 
+                    variant='destructive' 
                     color='black'
                 >
                     Reset
@@ -216,7 +216,7 @@ export default function Home() {
                 <Button
                     onClick={runRoute}
                     className='z-20 bg-black text-white'
-                    variant='default'
+                    variant='outline'
                     color='white'
                 >
                     Run

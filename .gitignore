@@ -1,0 +1,64 @@
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Environment variables
+.env
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+
+# Node modules and build output
+node_modules
+dist
+dist-ssr
+
+# Local environment files
+*.local
+
+# Editor directories and files
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Python-related files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Packaging and distribution
+build/
+*.egg-info/
+.eggs/
+
+# Linting cache
+.mypy_cache/
+.pyre/
+ruff_cache/
+
+# Test and coverage reports
+.pytest_cache/
+.tox/
+.nox/
+.coverage
+*.cover
+
+# Other ignored files
+*.bak
+*.tmp
+*.sqlite3
+*.db

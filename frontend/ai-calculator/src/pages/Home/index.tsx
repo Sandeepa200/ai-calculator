@@ -67,29 +67,45 @@ export default function Home() {
         if (canvas) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight - canvas.offsetTop;
+                //canvas.width = window.innerWidth;
+                //canvas.height = window.innerHeight - canvas.offsetTop;
                 ctx.lineCap = 'round';
                 ctx.lineWidth = brushSize;
             }
 
         }
-        const script = document.createElement('script');
-        script.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js?config=TeX-MML-AM_CHTML';
-        script.async = true;
-        document.head.appendChild(script);
+        if (!window.MathJax) {
+            const script = document.createElement('script');
+            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.9/MathJax.js?config=TeX-MML-AM_CHTML';
+            script.async = true;
+            document.head.appendChild(script);
 
-        script.onload = () => {
-            window.MathJax.Hub.Config({
-                tex2jax: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
-            });
-        };
+            script.onload = () => {
+                window.MathJax.Hub.Config({
+                    tex2jax: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
+                });
+            };
 
-        return () => {
-            document.head.removeChild(script);
-        };
+            return () => {
+                document.head.removeChild(script);
+            };
+        }
 
     }, [brushSize]);
+
+    // Add a new useEffect for initial canvas setup
+    useEffect(() => {
+        const canvas = canvasRef.current;
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight - canvas.offsetTop;
+                ctx.lineCap = 'round';
+                ctx.lineWidth = brushSize;
+            }
+        }
+    }, []);
 
     const renderLatexToCanvas = (expression: string, answer: string) => {
         const latex = `\\(\\LARGE{${expression} = ${answer}}\\)`;
@@ -116,19 +132,6 @@ export default function Home() {
         }
     };
 
-    const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
-        const canvas = canvasRef.current;
-        if (canvas) {
-            canvas.style.background = 'black';
-            const ctx = canvas.getContext('2d');
-            if (ctx) {
-                ctx.beginPath();
-                ctx.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-                ctx.lineWidth = brushSize;
-                setIsDrawing(true);
-            }
-        }
-    };
     const draw = (e: React.MouseEvent<HTMLCanvasElement>) => {
         if (!isDrawing) {
             return;
@@ -137,10 +140,40 @@ export default function Home() {
         if (canvas) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
-                ctx.strokeStyle = isEraserActive ? 'black' : color;
-                ctx.lineWidth = brushSize;
-                ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
-                ctx.stroke();
+                if (isEraserActive) {
+                    // Use clearRect for eraser
+                    const x = e.nativeEvent.offsetX;
+                    const y = e.nativeEvent.offsetY;
+                    ctx.save();
+                    ctx.beginPath();
+                    ctx.arc(x, y, brushSize / 2, 0, Math.PI * 2, true);
+                    ctx.clip();
+                    ctx.clearRect(x - brushSize, y - brushSize, brushSize * 2, brushSize * 2);
+                    ctx.restore();
+                } else {
+                    // Normal drawing
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = brushSize;
+                    ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+                    ctx.stroke();
+                }
+            }
+        }
+    };
+    
+    const startDrawing = (e: React.MouseEvent<HTMLCanvasElement>) => {
+        const canvas = canvasRef.current;
+        if (canvas) {
+            canvas.style.background = 'black';
+            const ctx = canvas.getContext('2d');
+            if (ctx) {
+                ctx.beginPath();
+                ctx.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+                if (!isEraserActive) {
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = brushSize;
+                }
+                setIsDrawing(true);
             }
         }
     };
@@ -219,7 +252,7 @@ export default function Home() {
                     className={`z-20 ${isEraserActive ? 'bg-blue-500' : 'bg-black'}`}
                     variant='outline'
                 >
-                    <FaEraser size={20} color='white'/>
+                    <FaEraser size={20} color='white' />
                 </Button>
                 <Group className='z-20 border border-gray-200 rounded p-4'>
                     {SWATCHES.map((swatch) => (

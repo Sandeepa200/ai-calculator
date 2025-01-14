@@ -31,7 +31,7 @@ export default function Home() {
     const [reset, setReset] = useState(false);
     const [dictOfVars, setDictOfVars] = useState({});
     const [result, setResult] = useState<GeneratedResult>();
-    const [latexPosition, setLatexPosition] = useState({ x: 100, y: 10 });
+    const [latexPosition, setLatexPosition] = useState({ x: 20, y: -800 });
     const [latexExpression, setLatexExpression] = useState<Array<string>>([]);
     const [brushSize, setBrushSize] = useState(3);
     const [isEraserActive, setIsEraserActive] = useState(false);
@@ -218,10 +218,10 @@ export default function Home() {
                 }
             }
 
-            const centerX = (minX + maxX) / 2;
-            const centerY = (minY + maxY) / 2;
+            //const centerX = (minX + maxX) / 2;
+            //const centerY = (minY + maxY) / 2;
 
-            setLatexPosition({ x: centerX, y: centerY });
+            setLatexPosition({ x: 20, y: -800 });
             resp.data.forEach((data: Response) => {
                 setTimeout(() => {
                     setResult({
@@ -235,8 +235,8 @@ export default function Home() {
 
     return (
         <>
-            <div className='bg-red-500 w-screen h-screen'>
-                <div className='absolute  bg-gray-900/80 backdrop-blur-sm rounded-xl p-4 shadow-lg z-50'>
+            <div className='bg-black w-screen h-screen'>
+                <div className='absolute left-1/2 -translate-x-1/2 bg-gray-900/80 backdrop-blur-sm rounded-xl p-4 shadow-lg z-50'>
                     <div className='grid grid-cols-1 sm:grid-cols-2 gap-4 items-center'>
                         <div className='flex flex-row gap-2'>
                             {/* Reset Button */}

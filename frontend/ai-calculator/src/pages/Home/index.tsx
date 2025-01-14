@@ -3,7 +3,9 @@ import { Button } from '@/components/ui/button';
 import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import Draggable from 'react-draggable';
-import {SWATCHES} from '@/constants';
+import { SWATCHES } from '@/constants';
+import { Slider } from '@mantine/core';
+import { FaEraser } from 'react-icons/fa';
 
 interface GeneratedResult {
     expression: string;
@@ -17,9 +19,9 @@ interface Response {
 }
 
 declare global {
-  interface Window {
-    MathJax: any;
-  }
+    interface Window {
+        MathJax: any;
+    }
 }
 
 
@@ -32,6 +34,8 @@ export default function Home() {
     const [result, setResult] = useState<GeneratedResult>();
     const [latexPosition, setLatexPosition] = useState({ x: 10, y: 200 });
     const [latexExpression, setLatexExpression] = useState<Array<string>>([]);
+    const [brushSize, setBrushSize] = useState(3);
+    const [isEraserActive, setIsEraserActive] = useState(false);
 
     useEffect(() => {
         if (latexExpression.length > 0 && window.MathJax) {
@@ -59,14 +63,14 @@ export default function Home() {
 
     useEffect(() => {
         const canvas = canvasRef.current;
-    
+
         if (canvas) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
                 canvas.width = window.innerWidth;
                 canvas.height = window.innerHeight - canvas.offsetTop;
                 ctx.lineCap = 'round';
-                ctx.lineWidth = 3;
+                ctx.lineWidth = brushSize;
             }
 
         }
@@ -77,7 +81,7 @@ export default function Home() {
 
         script.onload = () => {
             window.MathJax.Hub.Config({
-                tex2jax: {inlineMath: [['$', '$'], ['\\(', '\\)']]},
+                tex2jax: { inlineMath: [['$', '$'], ['\\(', '\\)']] },
             });
         };
 
@@ -85,7 +89,7 @@ export default function Home() {
             document.head.removeChild(script);
         };
 
-    }, []);
+    }, [brushSize]);
 
     const renderLatexToCanvas = (expression: string, answer: string) => {
         const latex = `\\(\\LARGE{${expression} = ${answer}}\\)`;
@@ -120,6 +124,7 @@ export default function Home() {
             if (ctx) {
                 ctx.beginPath();
                 ctx.moveTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
+                ctx.lineWidth = brushSize;
                 setIsDrawing(true);
             }
         }
@@ -132,7 +137,8 @@ export default function Home() {
         if (canvas) {
             const ctx = canvas.getContext('2d');
             if (ctx) {
-                ctx.strokeStyle = color;
+                ctx.strokeStyle = isEraserActive ? 'black' : color;
+                ctx.lineWidth = brushSize;
                 ctx.lineTo(e.nativeEvent.offsetX, e.nativeEvent.offsetY);
                 ctx.stroke();
             }
@@ -140,11 +146,11 @@ export default function Home() {
     };
     const stopDrawing = () => {
         setIsDrawing(false);
-    };  
+    };
 
     const runRoute = async () => {
         const canvas = canvasRef.current;
-    
+
         if (canvas) {
             const response = await axios({
                 method: 'post',
@@ -199,20 +205,37 @@ export default function Home() {
 
     return (
         <>
-            <div className='grid grid-cols-3 gap-2'>
+            <div className='grid grid-cols-4 gap-2'>
                 <Button
                     onClick={() => setReset(true)}
                     className='z-20 bg-black text-white'
-                    variant='destructive' 
+                    variant='destructive'
                     color='black'
                 >
                     Reset
                 </Button>
-                <Group className='z-20'>
+                <Button
+                    onClick={() => setIsEraserActive(!isEraserActive)}
+                    className={`z-20 ${isEraserActive ? 'bg-blue-500' : 'bg-black'}`}
+                    variant='outline'
+                >
+                    <FaEraser size={20} color='white'/>
+                </Button>
+                <Group className='z-20 border border-gray-200 rounded p-4'>
                     {SWATCHES.map((swatch) => (
                         <ColorSwatch key={swatch} color={swatch} onClick={() => setColor(swatch)} />
                     ))}
                 </Group>
+                <Slider
+                    value={brushSize}
+                    onChange={setBrushSize}
+                    min={1}
+                    max={20}
+                    step={1}
+                    label={(value) => `Brush Size: ${value}`}
+                    className='z-20 border border-gray-200 rounded px-10 py-2'
+                    style={{ width: '200px' }}
+                />
                 <Button
                     onClick={runRoute}
                     className='z-20 bg-black text-white'

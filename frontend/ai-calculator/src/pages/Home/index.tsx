@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import axios from 'axios';
 import Draggable from 'react-draggable';
 import {SWATCHES} from '@/constants';
-// import {LazyBrush} from 'lazy-brush';
 
 interface GeneratedResult {
     expression: string;
@@ -17,6 +16,13 @@ interface Response {
     assign: boolean;
 }
 
+declare global {
+  interface Window {
+    MathJax: any;
+  }
+}
+
+
 export default function Home() {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [isDrawing, setIsDrawing] = useState(false);
@@ -26,12 +32,6 @@ export default function Home() {
     const [result, setResult] = useState<GeneratedResult>();
     const [latexPosition, setLatexPosition] = useState({ x: 10, y: 200 });
     const [latexExpression, setLatexExpression] = useState<Array<string>>([]);
-
-    // const lazyBrush = new LazyBrush({
-    //     radius: 10,
-    //     enabled: true,
-    //     initialPoint: { x: 0, y: 0 },
-    // });
 
     useEffect(() => {
         if (latexExpression.length > 0 && window.MathJax) {
@@ -236,7 +236,7 @@ export default function Home() {
                 <Draggable
                     key={index}
                     defaultPosition={latexPosition}
-                    onStop={(e, data) => setLatexPosition({ x: data.x, y: data.y })}
+                    onStop={(_, data) => setLatexPosition({ x: data.x, y: data.y })}
                 >
                     <div className="absolute p-2 text-white rounded shadow-md">
                         <div className="latex-content">{latex}</div>
